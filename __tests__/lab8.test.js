@@ -1,7 +1,7 @@
 describe('Basic user flow for Website', () => {
   // First, visit the lab 8 website
   beforeAll(async () => {
-    await page.goto('https://cse110-f2021.github.io/Lab8_Website');
+    await page.goto('http://127.0.0.1:5501/index.html');
   });
 
   // Next, check to make sure that all 20 <product-item> elements have loaded
@@ -23,9 +23,13 @@ describe('Basic user flow for Website', () => {
     let data, plainValue;
     // Query select all of the <product-item> elements
     const prodItems = await page.$$('product-item');
-    console.log(`Checking product item 1/${prodItems.length}`);
+    // TODO - Step 1
+    // Right now this function is only checking the first <product-item> it found, make it so that
+    // it checks every <product-item> it found
+    for (let i = 0; i < prodItems.length; i++) {
+      console.log(`Checking product item ${i}/${prodItems.length}`);
     // Grab the .data property of <product-items> to grab all of the json data stored inside
-    data = await prodItems[0].getProperty('data');
+    data = await prodItems[i].getProperty('data');
     // Convert that property to JSON
     plainValue = await data.jsonValue();
     // Make sure the title, price, and image are populated in the JSON
@@ -34,10 +38,7 @@ describe('Basic user flow for Website', () => {
     if (plainValue.image.length == 0) { allArePopulated = false; }
     // Expect allArePopulated to still be true
     expect(allArePopulated).toBe(true);
-
-    // TODO - Step 1
-    // Right now this function is only checking the first <product-item> it found, make it so that
-    // it checks every <product-item> it found
+    }
 
   }, 10000);
 
@@ -48,8 +49,15 @@ describe('Basic user flow for Website', () => {
     // TODO - Step 2
     // Query a <product-item> element using puppeteer ( checkout page.$() and page.$$() in the docs )
     // Grab the shadowRoot of that element (it's a property), then query a button from that shadowRoot.
+    let prodItem = await page.$('product-item').getProperty('shadowRoot');
     // Once you have the button, you can click it and check the innerText property of the button.
+    let button = await prodItem.$('button');
+    await button.click();
+    let inner = await button.getProperty('innerText').jsonValue();
+
     // Once you have the innerText property, use innerText.jsonValue() to get the text value of it
+    expect(inner).toBe('Remove from Cart')
+
   }, 2500);
 
   // Check to make sure that after clicking "Add to Cart" on every <product-item> that the Cart
